@@ -106,3 +106,41 @@ lines(xVals,yVals4,type="l",col="maroon", lwd="2", xlab="Rundetid (minutt)", yla
 legend(5.6, 1.9, legend=c("Døgnet - mu", "Døgnet - X+"),
        col=c("royalblue", "maroon"), lty=1, cex=0.8)
 
+
+## ---- Hypotesetesting ----
+alpha = 0.26 # Vi velger en alpha selv. 0.26 = beholder H0, 0.27 = velger H1.
+
+(m_z = m_A_1-m_B_1)
+(sigma_z = sqrt(s1_A^2+s1_B))
+
+# Nybergs Satterthwaite metode med funksjon:
+Satterthwaite<-function(sdX,sdY,nuX,nuY) 
+{
+  fX<-sdX^2/(nuX+1)
+  fY<-sdY^2/(nuY+1)
+  en<-(fX+fY)^2
+  gX<-fX^2/nuX
+  gY<-fY^2/nuY
+  dn<-gX+gY
+  nZ<-en/dn
+  floor(nZ)
+}
+
+nu_z = Satterthwaite(s1_A, s1_B, nu_A_1, nu_B_1)
+
+# Vår egen Satterthwaite metode:
+teller1 = s1_A^2/(nu_A_1+1)
+teller2 = s1_B^2/(nu_B_1+1)
+tot_teller = (teller1+teller2)^2
+
+nevner1 = teller1^2/nu_A_1
+nevner2 = teller2^2/nu_B_1
+tot_nenver = nevner1+nevner2
+
+# Bruker Nybers metode, så kommenterer ut vår egen:
+# (nu_z = tot_teller/tot_nenver)
+
+(P_H0_muAB = (pt.scaled(0, nu_z, m_z, sigma_z)))
+P_H0_alphacheck(1-P_H0_muAB, alpha)
+
+

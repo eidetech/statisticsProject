@@ -1,4 +1,4 @@
 # statisticsProject
 
-data0 = ikke døgnet
-data1 = døgnet
+1. data0 = ikke døgnet
+2. data1 = døgnet

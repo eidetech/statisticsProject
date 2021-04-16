@@ -1,6 +1,7 @@
 ## ---- Import av bibliotek og datasett ----
 library(metRology)
 library(matlib)
+library(extraDistr)
 
 data0 = read.csv(file="DATA0.csv")
 data1 = read.csv(file="DATA1.csv")
@@ -139,6 +140,14 @@ tot_nenver = nevner1+nevner2
 
 # Bruker Nybers metode, så kommenterer ut vår egen:
 # (nu_z = tot_teller/tot_nenver)
+
+P_H0_alphacheck = function(P_H0, alpha_hyp){
+  if (P_H0 > alpha_hyp){
+    print("Vi forkaster ikke H_0 til fordel for H_1: Vi vedder på H_0")
+  }else{
+    print("Vi forkaster H_0 til fordel for H_1: Vi vedder på H_1")
+  }
+}
 
 (P_H0_muAB = (pt.scaled(0, nu_z, m_z, sigma_z)))
 P_H0_alphacheck(1-P_H0_muAB, alpha)

@@ -3,6 +3,9 @@ library(metRology)
 library(matlib)
 library(extraDistr)
 
+# Set work directory:
+setwd("C:/Users/marcu/github/statisticsProject")
+
 data0 = read.csv(file="DATA0.csv")
 data1 = read.csv(file="DATA1.csv")
 
@@ -109,7 +112,8 @@ legend(5.6, 1.9, legend=c("Døgnet - mu", "Døgnet - X+"),
 
 
 ## ---- Hypotesetesting ----
-alpha = 0.26 # Vi velger en alpha selv. 0.26 = beholder H0, 0.27 = velger H1.
+## ---- Hypotesetesting - Sammenlikne muA og muB (ikke ferdig)
+alpha = 0.05 # Vi velger en alpha selv. 0.26 = beholder H0, 0.27 = velger H1.
 
 (m_z = m_A_1-m_B_1)
 (sigma_z = sqrt(s1_A^2+s1_B))
@@ -149,7 +153,35 @@ P_H0_alphacheck = function(P_H0, alpha_hyp){
   }
 }
 
-(P_H0_muAB = (pt.scaled(0, nu_z, m_z, sigma_z)))
-P_H0_alphacheck(1-P_H0_muAB, alpha)
+(P_H0_muAB = (pt.scaled(10, nu_z, m_z, sigma_z)))
+P_H0_alphacheck(P_H0_muAB, alpha)
 
+xVals = seq(-100,100)
+(P_H0_muAB = (dt.scaled(xVals, nu_z, m_z, sigma_z)))
+plot(xVals, P_H0_muAB, type="l")
+
+
+
+# mu fordeling for data0 (ikke døgnet)
+xVals = seq(3, max(data0), 0.01)
+(yVals1=pt.scaled(4,nu_A_1,m_A_1,s1_A*sqrt(1/kappa_A_1)))  # Samme, men med y-verdier innenfor (0,1)
+plot(xVals,yVals1,type="l",col="royalblue", lwd="2", xlab="Rundetid (minutt)", ylab="", main="mu fordelinger")
+
+## ---- Hypotesetesting - sammenlikne muA/muB mot fast verdi
+# -- Grunnlag for beregning: --
+# mu0 = fast verdi vi vil sjekke mot
+# H_1_muA: muA > mu0
+# H_0_muA: muA <= mu0
+# alpha = 0.05
+
+# P(H_0_muA = P(mu_A <= mu0))
+# P_H0_muA = dt.scaled(mu0,nu_A_1,m_A_1,s1_A*sqrt(1/kappa_A_1)))
+
+alpha = 0.05 # Velger signifikans = 0.05
+mu0 = 3.8 # Leser av mu fordelingene og ser at ca 3.8 er forventningsverdi.
+(P_H0_muA = pt.scaled(mu0,nu_A_1,m_A_1,s1_A*sqrt(1/kappa_A_1)))
+(P_H0_muB = pt.scaled(mu0,nu_B_1,m_B_1,s1_B*sqrt(1/kappa_B_1)))
+
+P_H0_alphacheck(P_H0_muA, alpha)
+P_H0_alphacheck(P_H0_muB, alpha)
 

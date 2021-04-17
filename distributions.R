@@ -37,7 +37,6 @@ plotHypothesis <- function(range,limit,distr,lower=TRUE){
   lines(xVars,yVars,type="l", lwd="2",col="maroon")
 }
 
-
 # Set work directory:
 setwd("C:/Users/marcu/github/statisticsProject")
 
@@ -156,7 +155,6 @@ yVals6=dgamma(xVals, nu_A_1/2, SS1_A/2)  # Samme, men med y-verdier innenfor (0,
 lines(xVals,yVals6,type="l",col="royalblue", lwd="2", xlab="Rundetid (minutt)", ylab="", main="tau fordelinger")
 legend(4.3, 1.2, legend=c("Døgnet", "Ikke døgnet"),
        col=c("royalblue", "maroon"), lty=1, cex=0.8)
-
 
 ## ---- Hypotesetesting ----
 ## ---- Hypotesetesting - Sammenlikne muA og muB mot hverandre ----

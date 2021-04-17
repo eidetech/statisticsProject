@@ -3,6 +3,41 @@ library(metRology)
 library(matlib)
 library(extraDistr)
 
+## ---- Funksjoner ----
+
+# Nybergs Satterthwaite metode med funksjon:
+Satterthwaite<-function(sdX,sdY,nuX,nuY) 
+{
+  fX<-sdX^2/(nuX+1)
+  fY<-sdY^2/(nuY+1)
+  en<-(fX+fY)^2
+  gX<-fX^2/nuX
+  gY<-fY^2/nuY
+  dn<-gX+gY
+  nZ<-en/dn
+  floor(nZ)
+}
+
+# Hypotesetester
+P_H0_alphacheck = function(P_H0, alpha_hyp){
+  if (P_H0 > alpha_hyp){
+    print("Vi forkaster ikke H_0 til fordel for H_1: Vi vedder på H_0")
+  }else{
+    print("Vi forkaster H_0 til fordel for H_1: Vi vedder på H_1")
+  }
+}
+
+# Plotte hypotesetest
+plotHypothesis <- function(range,limit,distr,lower=TRUE){
+  xVars=seq(range[1],range[2],(range[2]-range[1])/10000)
+  yVars=distr(xVars)
+  plot(xVars,yVars,type="l", lwd="2",col="maroon",ylim=c(0,max(yVars)))
+  yVars2=yVars*((xVars<=limit)==lower)
+  lines(xVars,yVars2,type="h",col="royalblue")   
+  lines(xVars,yVars,type="l", lwd="2",col="maroon")
+}
+
+
 # Set work directory:
 setwd("C:/Users/marcu/github/statisticsProject")
 
@@ -110,64 +145,40 @@ lines(xVals,yVals4,type="l",col="maroon", lwd="2", xlab="Rundetid (minutt)", yla
 legend(5.6, 1.9, legend=c("Døgnet - mu", "Døgnet - X+"),
        col=c("royalblue", "maroon"), lty=1, cex=0.8)
 
+## ---- tau fordelinger ----
+# tau fordeling for døgnet:
+xVals = seq(0, max(data0), 0.01)
+yVals5=dgamma(xVals, nu_B_1/2, SS1_B/2)  # Samme, men med y-verdier innenfor (0,1)
+plot(xVals,yVals5,type="l",col="maroon", lwd="2", xlab="Rundetid (minutt)", ylab="", main="tau fordelinger")
+
+# tau fordeling for ikke døgnet:
+yVals6=dgamma(xVals, nu_A_1/2, SS1_A/2)  # Samme, men med y-verdier innenfor (0,1)
+lines(xVals,yVals6,type="l",col="royalblue", lwd="2", xlab="Rundetid (minutt)", ylab="", main="tau fordelinger")
+legend(4.3, 1.2, legend=c("Døgnet", "Ikke døgnet"),
+       col=c("royalblue", "maroon"), lty=1, cex=0.8)
+
 
 ## ---- Hypotesetesting ----
-## ---- Hypotesetesting - Sammenlikne muA og muB (ikke ferdig)
-alpha = 0.05 # Vi velger en alpha selv. 0.26 = beholder H0, 0.27 = velger H1.
+## ---- Hypotesetesting - Sammenlikne muA og muB mot hverandre ----
+alpha = 0.05
 
-(m_z = m_A_1-m_B_1)
-(sigma_z = sqrt(s1_A^2+s1_B))
-
-# Nybergs Satterthwaite metode med funksjon:
-Satterthwaite<-function(sdX,sdY,nuX,nuY) 
-{
-  fX<-sdX^2/(nuX+1)
-  fY<-sdY^2/(nuY+1)
-  en<-(fX+fY)^2
-  gX<-fX^2/nuX
-  gY<-fY^2/nuY
-  dn<-gX+gY
-  nZ<-en/dn
-  floor(nZ)
-}
-
-nu_z = Satterthwaite(s1_A, s1_B, nu_A_1, nu_B_1)
-
-# Vår egen Satterthwaite metode:
-teller1 = s1_A^2/(nu_A_1+1)
-teller2 = s1_B^2/(nu_B_1+1)
-tot_teller = (teller1+teller2)^2
-
-nevner1 = teller1^2/nu_A_1
-nevner2 = teller2^2/nu_B_1
-tot_nenver = nevner1+nevner2
-
-# Bruker Nybers metode, så kommenterer ut vår egen:
-# (nu_z = tot_teller/tot_nenver)
-
-P_H0_alphacheck = function(P_H0, alpha_hyp){
-  if (P_H0 > alpha_hyp){
-    print("Vi forkaster ikke H_0 til fordel for H_1: Vi vedder på H_0")
-  }else{
-    print("Vi forkaster H_0 til fordel for H_1: Vi vedder på H_1")
-  }
-}
-
-(P_H0_muAB = (pt.scaled(10, nu_z, m_z, sigma_z)))
+(P_H0_muAB = pnorm(0, m_A_1-m_B_1, sqrt((s1_A^2/kappa_A_1)+(s1_B^2/kappa_B_1))))
+# muA <= muB
 P_H0_alphacheck(P_H0_muAB, alpha)
 
-xVals = seq(-100,100)
-(P_H0_muAB = (dt.scaled(xVals, nu_z, m_z, sigma_z)))
-plot(xVals, P_H0_muAB, type="l")
+## Normalfordeling til å plotte hypotesen.
+theDistr = function(x) {
+  dnorm(x, m_A_1-m_B_1, sqrt((s1_A^2/kappa_A_1)+(s1_B^2/kappa_B_1)))
+}
+
+lower = -2
+upper = 2
+theLimit = 0
+plotHypothesis(c(lower,upper),theLimit,theDistr,TRUE)
+# Vi ser en klar overvekt i H0.
 
 
-
-# mu fordeling for data0 (ikke døgnet)
-xVals = seq(3, max(data0), 0.01)
-(yVals1=pt.scaled(4,nu_A_1,m_A_1,s1_A*sqrt(1/kappa_A_1)))  # Samme, men med y-verdier innenfor (0,1)
-plot(xVals,yVals1,type="l",col="royalblue", lwd="2", xlab="Rundetid (minutt)", ylab="", main="mu fordelinger")
-
-## ---- Hypotesetesting - sammenlikne muA/muB mot fast verdi
+## ---- Hypotesetesting - sammenlikne muA/muB mot fast verdi ----
 # -- Grunnlag for beregning: --
 # mu0 = fast verdi vi vil sjekke mot
 # H_1_muA: muA > mu0
@@ -184,4 +195,18 @@ mu0 = 3.8 # Leser av mu fordelingene og ser at ca 3.8 er forventningsverdi.
 
 P_H0_alphacheck(P_H0_muA, alpha)
 P_H0_alphacheck(P_H0_muB, alpha)
+
+## t fordelinger til å plotte hypotesene.
+theDistr1 = function(x) {
+  dt.scaled(x,nu_A_1,m_A_1,s1_A*sqrt(1/kappa_A_1))
+}
+theDistr2 = function(x) {
+  dt.scaled(x,nu_B_1,m_B_1,s1_B*sqrt(1/kappa_B_1))
+}
+
+lower = 3
+upper = 5
+theLimit = mu0
+plotHypothesis(c(lower,upper),theLimit,theDistr1,TRUE)
+plotHypothesis(c(lower,upper),theLimit,theDistr2,TRUE)
 
